@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">GetGithubInfo</string>
+    <string name="user_list_activity_name">UserListActivity</string>
+</resources>
