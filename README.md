@@ -8,7 +8,7 @@ Github 提供了获取用户数据的RESTful API：
 
 查询用户的Repos：https://api.github.com/users/test/repos
 
-请编写一个Android App，在输入查询关键字后，能够实时显示出结果列表，列表每一项对应用户的信息，包括：用户名，用户头像，用户的编程语言偏好（可以从用户Repos中获取到）。如遇鉴权问题等请查阅GitHub文档解决。
+请编写一个Android App，在输入查询关键字后，能够<font color=red>实时</font>显示出结果列表，列表每一项对应用户的信息，包括：用户名，用户头像，用户的编程语言偏好（可以从用户Repos中获取到）。如遇鉴权问题等请查阅GitHub文档解决。
 
 要求：
 
@@ -30,7 +30,11 @@ Github 提供了获取用户数据的RESTful API：
 
 ##更新信息
 
-2.0版本更新日志：
+**2.0版本更新日志：**
 
 1. 在访问字段中增加client_id和client_secret字段，使得访问限制有60/h增加到5000/h。
 2. 优化ListView，使用Glide来加载图片，修复了头像和语言的错位的bug。
+
+**3.0版本更新日志：**
+
+不做跳转，在同一个Activity中显示数据。(实时显示数据)
