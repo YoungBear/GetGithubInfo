@@ -10,6 +10,7 @@ public class UserInfo implements Serializable{
 
 	private String username;
 	private String faceUrl;
+	private String interestLanguage;
 
 	public void setUsername(String username) {
 		this.username = username;
@@ -28,4 +29,11 @@ public class UserInfo implements Serializable{
 		return faceUrl;
 	}
 
+	public String getInterestLanguage() {
+		return interestLanguage;
+	}
+
+	public void setInterestLanguage(String interestLanguage) {
+		this.interestLanguage = interestLanguage;
+	}
 }

@@ -86,7 +86,8 @@ public class MainActivity extends Activity {
 				PER_PAGE_COUNT = count;
 			}
 		}
-		String getUsersUrl = String.format(UrlValue.SEARCH_USER_URL, keyWords, String.valueOf(PER_PAGE_COUNT));
+		String getUsersUrl = String.format(UrlValue.SEARCH_USER_URL,
+				keyWords, String.valueOf(PER_PAGE_COUNT), UrlValue.CLIENT_ID_VALUE, UrlValue.CLIENT_SECRET_VALUE);
 		Log.d(TAG, "getUsersUrl: " + getUsersUrl);
 		GsonRequest<UserSearchResult> userSearchResultGsonRequest = new GsonRequest<UserSearchResult>(
 				Request.Method.GET,

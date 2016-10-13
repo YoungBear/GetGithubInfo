@@ -3,7 +3,6 @@ package com.example.getgithubinfo.activity;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,9 +17,9 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
+import com.bumptech.glide.Glide;
 import com.example.getgithubinfo.R;
 import com.example.getgithubinfo.model.UserInfo;
 import com.example.getgithubinfo.url.UrlValue;
@@ -41,6 +40,8 @@ public class UserListActivity extends Activity {
 	private RequestQueue mRequestQueue;
 
 	private ListView mListView;
+	private MyAdapter mAdapter;
+	private List<UserInfo> mUserInfoList;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -51,11 +52,14 @@ public class UserListActivity extends Activity {
 		mRequestQueue = Volley.newRequestQueue(this.getApplicationContext());
 
 		Intent intent = getIntent();
-		List<UserInfo> data = (ArrayList<UserInfo>)intent.getSerializableExtra("user_list");
-		if (null != data) {
-			Log.d(TAG, "data.size: " + data.size());
-			MyAdapter mAdapter = new MyAdapter(data);
+		mUserInfoList = (ArrayList<UserInfo>)intent.getSerializableExtra("user_list");
+		if (null != mUserInfoList) {
+			Log.d(TAG, "mUserInfoList.size: " + mUserInfoList.size());
+			mAdapter = new MyAdapter();
 			mListView.setAdapter(mAdapter);
+		}
+		for (int i = 0; i < mUserInfoList.size(); i++) {
+			getInterestLanguage(mUserInfoList.get(i));
 		}
 	}
 
@@ -71,11 +75,69 @@ public class UserListActivity extends Activity {
 		super.onDestroy();
 	}
 
-	private class MyAdapter extends BaseAdapter {
-		private List<UserInfo> mUserInfoList;
-		public MyAdapter(List<UserInfo> userInfos) {
-			this.mUserInfoList = userInfos;
+	private void getInterestLanguage(final UserInfo item) {
+		//不是标准json格式，需要用JSONArray来实现
+		JSONArray jsonArray = new JSONArray();
+		String url = String.format(UrlValue.USER_REPOS_URL,
+				item.getUsername(), UrlValue.CLIENT_ID_VALUE, UrlValue.CLIENT_SECRET_VALUE);
+		Log.d(TAG, "getRepoUrl: " + url);
+		JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
+				url,
+				jsonArray,
+				new Response.Listener<JSONArray>() {
+					@Override
+					public void onResponse(JSONArray response) {
+						Log.d(TAG, "response: " + response.toString());
+						int length = response.length();
+						Log.d(TAG, "length: " + length);
+						if (length == 0) {
+							return;
+						}
+						Map<String, Integer> languageMap = new HashMap<>();
+						for (int i = 0; i < response.length(); i++) {
+							try {
+								String languageValue = response.getJSONObject(i).getString("language");
+								if (languageMap.containsKey(languageValue)) {
+									languageMap.put(languageValue, languageMap.get(languageValue) + 1);
+								} else {
+									languageMap.put(languageValue, 1);
+								}
+							} catch (JSONException e) {
+								e.printStackTrace();
+							}
+						}
+						if (languageMap.size() == 0) {
+							return;
+						}
+						//获取使用最多的语言
+						int max = 0;
+						String result = null;
+						for (Map.Entry<String, Integer> entry : languageMap.entrySet()) {
+							if (entry.getValue() > max) {
+								max = entry.getValue();
+								result = entry.getKey();
+							}
+						}
+						Log.d(TAG, "result: " + result);
+						if (null != result) {
+							item.setInterestLanguage(result);
+							mAdapter.notifyDataSetChanged();
+						}
+					}
+				},
+				new Response.ErrorListener() {
+					@Override
+					public void onErrorResponse(VolleyError error) {
+						Log.d(TAG, "onErrorResponse, error: " + error.getMessage());
+					}
+				});
+		if (mRequestQueue != null) {
+			jsonArrayRequest.setTag(TAG);
+			mRequestQueue.add(jsonArrayRequest);
 		}
+	}
+
+	private class MyAdapter extends BaseAdapter {
 
 		@Override
 		public int getCount() {
@@ -107,91 +169,17 @@ public class UserListActivity extends Activity {
 			}
 
 			UserInfo item = mUserInfoList.get(position);
-			setFaceImage(item.getFaceUrl(), holder.img_user_face);
+			Glide.with(UserListActivity.this)
+					.load(item.getFaceUrl())
+					.placeholder(R.mipmap.ic_loading)
+					.into(holder.img_user_face);
 			holder.txt_username.setText(item.getUsername());
-			getInterestLanguage(item.getUsername(), holder.txt_interest_language);
+			if (null != item.getInterestLanguage()) {
+				holder.txt_interest_language.setText(item.getInterestLanguage());
+			} else {
+				holder.txt_interest_language.setText("");
+			}
 			return convertView;
-		}
-
-		private void setFaceImage(String faceUrl, final ImageView imgFace) {
-			ImageRequest imageRequest = new ImageRequest(
-					faceUrl,
-					new Response.Listener<Bitmap>() {
-						@Override
-						public void onResponse(Bitmap response) {
-							imgFace.setImageBitmap(response);
-						}
-					}, 0, 0, Bitmap.Config.RGB_565,
-					new Response.ErrorListener() {
-						@Override
-						public void onErrorResponse(VolleyError error) {
-
-						}
-					});
-			if (mRequestQueue != null) {
-				imageRequest.setTag(TAG);
-				mRequestQueue.add(imageRequest);
-			}
-		}
-
-		private void getInterestLanguage(String username, final TextView txtInterestLanguage) {
-			//不是标准json格式，需要用JSONArray来实现
-			JSONArray jsonArray = new JSONArray();
-			String url = String.format(UrlValue.USER_REPOS_URL, username);
-			Log.d(TAG, "url: " + url);
-			JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
-					url,
-					jsonArray,
-					new Response.Listener<JSONArray>() {
-						@Override
-						public void onResponse(JSONArray response) {
-							Log.d(TAG, "response: " + response.toString());
-							int length = response.length();
-							Log.d(TAG, "length: " + length);
-							if (length == 0) {
-								return;
-							}
-							Map<String, Integer> languageMap = new HashMap<>();
-							for (int i = 0; i < response.length(); i++) {
-								try {
-									String languageValue = response.getJSONObject(i).getString("language");
-									if (languageMap.containsKey(languageValue)) {
-										languageMap.put(languageValue, languageMap.get(languageValue) + 1);
-									} else {
-										languageMap.put(languageValue, 1);
-									}
-								} catch (JSONException e) {
-									e.printStackTrace();
-								}
-							}
-							if (languageMap.size() == 0) {
-								return;
-							}
-							//获取使用最多的语言
-							int max = 0;
-							String result = null;
-							for (Map.Entry<String, Integer> entry : languageMap.entrySet()) {
-								if (entry.getValue() > max) {
-									max = entry.getValue();
-									result = entry.getKey();
-								}
-							}
-							Log.d(TAG, "result: " + result);
-							if (null != result) {
-								txtInterestLanguage.setText(result);
-							}
-						}
-					},
-					new Response.ErrorListener() {
-						@Override
-						public void onErrorResponse(VolleyError error) {
-							Log.d(TAG, "onErrorResponse, error: " + error.getMessage());
-						}
-					});
-			if (mRequestQueue != null) {
-				jsonArrayRequest.setTag(TAG);
-				mRequestQueue.add(jsonArrayRequest);
-			}
 		}
 	}
 
