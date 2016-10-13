@@ -6,7 +6,7 @@ package com.example.getgithubinfo.url;
 
 public final class UrlValue {
 	public static final String HOST = "https://api.github.com";
-	public static final String SEARCH_USER_URL = HOST + "/search/users?q=%s&per_page=%s&client_id=%s&client_secret=%s";
+	public static final String SEARCH_USER_URL = HOST + "/search/users?q=%s&client_id=%s&client_secret=%s";
 	public static final String USER_REPOS_URL = HOST + "/users/%s/repos?client_id=%s&client_secret=%s";
 
 	//use OAuth application to exceed rate limit from 60 to 5000 per hour

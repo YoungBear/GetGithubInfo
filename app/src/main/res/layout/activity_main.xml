@@ -18,21 +18,12 @@
         android:layout_height="wrap_content"
         android:hint="please input key words"/>
 
-    <EditText
-        android:id="@+id/et_per_page_count"
+    <ListView
+        android:id="@+id/list_view_users"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="please input search result of per page count(default 30)"/>
+        android:layout_height="wrap_content">
 
-    <Button
-        android:id="@+id/btn_confirm"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="confirm"/>
+    </ListView>
 
-    <TextView
-        android:id="@+id/txt_error_info"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
 
 </LinearLayout>
