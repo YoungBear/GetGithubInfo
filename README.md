@@ -27,3 +27,10 @@ Github 提供了获取用户数据的RESTful API：
 另外，同一个ip访问github api会有次数限制。
 
 获取用户感兴趣的语言，是通过访问其所有repo，查找language字段，选择出现次数最多的作为感兴趣语言。
+
+##更新信息
+
+2.0版本更新日志：
+
+1. 在访问字段中增加client_id和client_secret字段，使得访问限制有60/h增加到5000/h。
+2. 优化ListView，使用Glide来加载图片，修复了头像和语言的错位的bug。
