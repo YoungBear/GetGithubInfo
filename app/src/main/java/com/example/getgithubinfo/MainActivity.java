@@ -116,7 +116,7 @@ public class MainActivity extends Activity {
 						Log.d(TAG, "fail to get user info");
 					}
 				});
-		userSearchResultGsonRequest.setTag(TAG);
+		userSearchResultGsonRequest.setTag(SEARCH_TAG);
 		if (mRequestQueue != null) {
 			cancelAllRequest();
 			mRequestQueue.add(userSearchResultGsonRequest);
@@ -179,7 +179,7 @@ public class MainActivity extends Activity {
 						Log.d(TAG, "onErrorResponse, error: " + error.getMessage());
 					}
 				});
-		jsonArrayRequest.setTag(TAG);
+		jsonArrayRequest.setTag(REPOS_TAG);
 		if (mRequestQueue != null) {
 			cancelAllRequest();
 			mRequestQueue.add(jsonArrayRequest);
